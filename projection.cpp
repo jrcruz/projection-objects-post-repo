@@ -22,15 +22,23 @@ std::ostream& operator<<(std::ostream& o, const Test& t)
 }
 
 
+
+template <auto Projection>
+auto projection()
+{
+    return [](const Test& x1, const Test& x2) {
+        return (x1.*Projection)() < (x2.*Projection)();
+    };
+}
+
+
 int main()
 {
     std::vector<Test> v{
         {12.2,2}, {20.4,43}, {3.1,64}, {210.32,6}, {0.11,3}
     };
 
-    std::sort(v.begin(), v.end(), [](const Test& t1, const Test& t2) {
-        return t1.getA() < t2.getA();
-    });
+    std::sort(v.begin(), v.end(), projection<&Test::getA>());
 
     for (const Test& t : v) { std::cout << t << "\n"; }
 

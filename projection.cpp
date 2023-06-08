@@ -23,11 +23,12 @@ std::ostream& operator<<(std::ostream& o, const Test& t)
 
 
 
-template <auto Projection>
+template <auto Projection, typename Comparator = std::less<>>
 auto projection()
 {
-    return [](const Test& x1, const Test& x2) {
-        return (x1.*Projection)() < (x2.*Projection)();
+    return [](const auto& x1, const auto& x2) {
+        return Comparator{}((x1.*Projection)(),
+                            (x2.*Projection)());
     };
 }
 
@@ -38,7 +39,7 @@ int main()
         {12.2,2}, {20.4,43}, {3.1,64}, {210.32,6}, {0.11,3}
     };
 
-    std::sort(v.begin(), v.end(), projection<&Test::getA>());
+    std::sort(v.begin(), v.end(), projection<&Test::getA, std::greater<>>());
 
     for (const Test& t : v) { std::cout << t << "\n"; }
 

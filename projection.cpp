@@ -17,12 +17,12 @@ public:
     Test(double a, int b) : a_{a}, b_{b} { }
     double getA() const { return a_; }
     int getB() const { return b_; }
-    int possibleSelect() { return a_ + b_; }
 };
 std::ostream& operator<<(std::ostream& o, const Test& t)
 {
     return o << "Test(" << t.getA() << ", " << t.getB() << ")";
 }
+
 
 double distance(const Test& t1, const Test& t2) {
     return std::hypot(t2.getA() - t1.getA(), t2.getB() - t1.getB());
@@ -32,10 +32,10 @@ double distance(const Test& t1, const Test& t2) {
 template <auto Projection, typename Comparator = std::less<>, typename ... ProjArgs>
 auto projection(ProjArgs&& ... args)
 {
-    return [...args = std::forward<ProjArgs>(args)](const auto& x1, const auto& x2) {
+    return [... args = std::forward<decltype(args)>(args)](const auto& x1, const auto& x2) {
         return Comparator{}(
-            std::invoke(Projection, x1, args...),
-            std::invoke(Projection, x2, args...));
+            std::invoke(Projection, x1, std::forward<decltype(args)>(args) ...),
+            std::invoke(Projection, x2, std::forward<decltype(args)>(args) ...));
     };
 }
 
@@ -59,7 +59,7 @@ int main()
     std::cout << "min distance to tx: " << *m2 << "\n";
     std::cout << "\n";
 
-    std::sort(v.begin(), v.end(), projection<distance>(tx));
+    std::sort(v.begin(), v.end(), projection<distance, std::greater<>>(tx));
     for (const Test& t : v) { std::cout << t << " " << distance(tx, t) << "\n"; }
     std::cout << "\n";
 }
